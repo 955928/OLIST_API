@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 query = 'SELECT * FROM TrainingDataset'
 
 #Connect to the SQLITE database
-with sqlite3.connect('olist2.db') as conn:
+with sqlite3.connect('olist.db') as conn:
     df = pd.read_sql_query(query, conn)
 
 conn.close()

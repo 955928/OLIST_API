@@ -21,7 +21,7 @@ import sqlite3
 query = 'SELECT * FROM TrainingDataset'
 
 # Setup data
-with sqlite3.connect('olist2.db') as conn:
+with sqlite3.connect('olist.db') as conn:
     df = pd.read_sql_query(query, conn)
 
 df['order_delivered_customer_date'] = pd.to_datetime(df['order_delivered_customer_date'])
