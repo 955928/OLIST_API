@@ -11,18 +11,6 @@ with sqlite3.connect('olist.db') as conn:
     
 conn.close()
 
-# background_image_style = """
-#     <style>
-#         body {
-#             background-image: url('img.png');
-#             background-size: cover;
-#         }
-#     </style>
-# """
-
-
-
-# Make page
 
 st.set_page_config(page_title="Olist")
 st.header("Olist Machine Learning Project")

@@ -31,19 +31,19 @@ st.set_page_config(page_title="Prediction")
 st.header("Prediction - Iris Dataset")
 st.markdown("Utilize the RandomForestClassifier to make predictions for the classification of review score."
             "The predictions will be displayed on the graphs below to intuitively understand how they were made.")
-st.sidebar.header("Make Prediction")
+st.sidebar.header("Make PredictionM")
 
-customer_d = st.sidebar.text_input("order_delivered_customer_date")
-estimated_d = st.sidebar.text_input("order_estimated_delivery_date")
+t_l = st.sidebar.text_input("temps_livraison")
+r_l = st.sidebar.text_input("retard_livraison")
 make_pred_API = st.sidebar.button("Predict")
 
 # # Affichage de scatterplot
 df1 = df.loc[df['order_delivered_customer_date'] < df['order_estimated_delivery_date']]
 plot1 = px.scatter(
     df,
-    x="order_delivered_customer_date",
-    y="order_estimated_delivery_date",
-    title="Orders delivered less than initial Estimated Delivery Time",
+    x="temps_livraison",
+    y="retard_livraison",
+    title="Orders delivered later than initial Estimated Delivery Time",
     color='score',
     color_continuous_scale='Viridis',
     size_max=10)
@@ -51,81 +51,58 @@ plot1 = px.scatter(
 df2 = df.loc[df['order_delivered_customer_date'] >= df['order_estimated_delivery_date']]
 plot2 = px.scatter(
     df,
-    x="order_delivered_customer_date",
-    y="order_estimated_delivery_date",
+    x="temps_livraison",
+    y="retard_livraison",
     title="Orders delivered later than initial Estimated Delivery Time",
     color='score',
     color_continuous_scale='Viridis',
     size_max=10)
 
-df3 = df.loc[df['order_delivered_customer_date'] < df['order_estimated_delivery_date']]
-plot3 = px.histogram(
-    df3.sample(frac=0.09),
-    x="order_delivered_carrier_date",
-    y="temps_livraison",
-    title='Graphs showing the Carrier Delivery Date in function of on-time deliveries',
-    color='score',
-    color_discrete_map={1: 'red', 0: 'green'},
-    nbins=40
-)
 
-
-
+score_pred = None
 
 # Launch prediction with API
 if make_pred_API:
 #     # Construire l'URL avec les paramètres
-    url = f"http://localhost:8000/{float(customer_d)}/{float(estimated_d)}"
+    url = f"http://localhost:8000/{(t_l)}/{(r_l)}"
 
 #     # Envoyer la requête à FastAPI
     response = requests.get(url)
 
 #     # Vérifier si la requête a réussi (statut 200)
     if response.status_code == 200:
-        score_pred = response.json()["prediction"]
+        score_pred = response.json().get("prediction", "Default Value")
         st.success(f"Prediction result: {score_pred} ")
     else:
         st.error("Error in prediction request.")
 
 #     # Transformer mes x1/x2/x3/x4 en df
-    p1 = [str(customer_d), str(estimated_d)]
+    p1 = [float(t_l), float(r_l)]
     x = np.array([p1])
-    row = {"order_delivered_customer_date": [float(customer_d)],
-           "order_estimated_delivery_date": [float(estimated_d)]
+    row = {"temps_livraison": [float(t_l)],
+           "retard_livraison": [float(r_l)]
            }
 
 
-#     p1_df = pd.DataFrame(row)
+    p1_df = pd.DataFrame(row)
 
-#     plot1.add_scatter(x=p1_df["petal_length"], 
-#                       y=p1_df["petal_width"],
-#                       mode='markers',  
-#                       name=species_pred,  
-#                       marker=dict(
-#                             color='red',  # Couleur des points
-#                             size=10,  # Taille des points
-#                             symbol='circle',  # Type de marqueur (vous pouvez choisir parmi divers symboles)
-#                             line=dict(
-#                                 color='white',  # Couleur de la bordure des points
-#                                 width=2  # Largeur de la bordure des points
-#                             )
-#                       ))
-#     plot2.add_scatter(x=p1_df["sepal_length"], 
-#                       y=p1_df["petal_length"],
-#                       mode='markers',  
-#                       name=species_pred,  
-#                       marker=dict(
-#                             color='red',  # Couleur des points
-#                             size=10,  # Taille des points
-#                             symbol='circle',  # Type de marqueur (vous pouvez choisir parmi divers symboles)
-#                             line=dict(
-#                                 color='white',  # Couleur de la bordure des points
-#                                 width=2  # Largeur de la bordure des points
-#                             )
-#     ))
+    plot1.add_scatter(x=p1_df["temps_livraison"], 
+                      y=p1_df["retard_livraison"],
+                      mode='markers',  
+                      name=score_pred,  
+                      marker=dict(
+                            color='red',  # Couleur des points
+                            size=10,  # Taille des points
+                            symbol='circle',  # Type de marqueur (vous pouvez choisir parmi divers symboles)
+                            line=dict(
+                                color='white',  # Couleur de la bordure des points
+                                width=2  # Largeur de la bordure des points
+                            )
+                      ))
+    
 
-# st.plotly_chart(plot1)
-# st.plotly_chart(plot2)
+    
+st.plotly_chart(plot1)
 
 
 
